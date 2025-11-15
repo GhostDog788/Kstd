@@ -1,24 +1,8 @@
 #include <iostream>
-#include <string>
+#include "Utils.hpp"
 #include "CircularBuffer.h"
 
 constexpr auto BUFFER_SIZE = 5;
-
-template<typename T>
-std::string serialize_circular_buffer(CircularBuffer<T>& buffer)
-{
-	std::string result;
-	result += '[';
-	T item;
-	for (size_t i = 0; i < buffer.size(); ++i)
-	{
-		if (!buffer.at(i, item)) break;
-		if (i != 0) result += " ";
-		result += std::to_string(item);
-	}
-	result += ']';
-	return result;
-}
 
 int main()
 {
@@ -28,4 +12,12 @@ int main()
 		buffer.push(i);
 		std::cout << serialize_circular_buffer(buffer) << std::endl;
 	}
+
+	// Move semantics test
+	CircularBuffer<int> buffer2(std::move(buffer));
+	std::cout << "Move constructor: " << serialize_circular_buffer(buffer2) << std::endl;
+	buffer = std::move(buffer2);
+	std::cout << "Move instance: " << serialize_circular_buffer(buffer) << std::endl;
+	CircularBuffer<int> buffer3 = std::move(buffer);
+	std::cout << "Move copy constructor: " << serialize_circular_buffer(buffer3) << std::endl;
 }
