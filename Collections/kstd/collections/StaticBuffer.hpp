@@ -1,4 +1,5 @@
 #pragma once
+#include <kstd/memory/allocation.hpp>
 
 namespace kstd {
 
@@ -6,7 +7,7 @@ namespace kstd {
 	class StaticBuffer
 	{
 	public:
-		StaticBuffer(size_t items) : m_items(items) { m_buffer = new T[items]; }
+		StaticBuffer(size_t items) : m_items(items) { m_buffer = allocate_array<T>(items); }
 		StaticBuffer(const StaticBuffer&) = delete;
 		StaticBuffer& operator=(const StaticBuffer&) = delete;
 		StaticBuffer(StaticBuffer&& other) noexcept
@@ -23,24 +24,24 @@ namespace kstd {
 			}
 			return *this;
 		}
-		virtual ~StaticBuffer() { delete[] m_buffer; }
+		virtual ~StaticBuffer() { free_array<T>(m_buffer); }
 
-		T& operator[](size_t index) const { return m_buffer[index]; }
+		virtual T& operator[](size_t index) const { return m_buffer[index]; }
 
-		size_t size() const { return m_items; }
-		size_t size_in_bytes() const { return m_items * sizeof(T); }
+		virtual size_t size() const { return m_items; }
+		virtual size_t size_in_bytes() const { return m_items * sizeof(T); }
 
 	protected:
 		T* m_buffer = nullptr;
 		size_t m_items = 0;
 
-		void _moved()
+		virtual void _moved()
 		{
 			m_buffer = nullptr;
 			m_items = 0;
 		}
 
-		void _copy_from(const StaticBuffer& other)
+		virtual void _copy_from(const StaticBuffer& other)
 		{
 			m_buffer = other.m_buffer;
 			m_items = other.m_items;

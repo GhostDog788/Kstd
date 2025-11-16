@@ -21,10 +21,19 @@
     <ClInclude Include="kstd\kstd.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="kstd\utils\move.hpp">
+    <ClInclude Include="kstd\memory\move.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="kstd\collections\StaticBuffer.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="kstd\memory\allocation.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="kstd\collections\DynamicBuffer.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="kstd\collections\String.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
