@@ -1,12 +1,13 @@
 #include <iostream>
+#include <kstd/utils/move.hpp>
+#include <kstd/collections/CircularBuffer.hpp>
 #include "Utils.hpp"
-#include "CircularBuffer.h"
 
 constexpr auto BUFFER_SIZE = 5;
 
 int main()
 {
-	CircularBuffer<int> buffer(BUFFER_SIZE);
+	kstd::CircularBuffer<int> buffer(BUFFER_SIZE);
 	for (int i = -10; i <= 15; ++i)
 	{
 		buffer.push(i);
@@ -14,10 +15,10 @@ int main()
 	}
 
 	// Move semantics test
-	CircularBuffer<int> buffer2(std::move(buffer));
+	kstd::CircularBuffer<int> buffer2(kstd::move(buffer));
 	std::cout << "Move constructor: " << serialize_circular_buffer(buffer2) << std::endl;
-	buffer = std::move(buffer2);
+	buffer = kstd::move(buffer2);
 	std::cout << "Move instance: " << serialize_circular_buffer(buffer) << std::endl;
-	CircularBuffer<int> buffer3 = std::move(buffer);
+	kstd::CircularBuffer<int> buffer3 = kstd::move(buffer);
 	std::cout << "Move copy constructor: " << serialize_circular_buffer(buffer3) << std::endl;
 }
