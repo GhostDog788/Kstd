@@ -130,6 +130,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="kstd\collections\CircularBuffer.hpp" />
+    <ClInclude Include="kstd\collections\ShiftingBuffer.hpp" />
     <ClInclude Include="kstd\collections\DynamicBuffer.hpp" />
     <ClInclude Include="kstd\collections\String.hpp" />
     <ClInclude Include="kstd\kstd.h" />
