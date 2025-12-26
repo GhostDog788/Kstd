@@ -39,5 +39,8 @@
     <ClInclude Include="kstd\memory\New.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="kstd\synchronization\RemoveLock.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
