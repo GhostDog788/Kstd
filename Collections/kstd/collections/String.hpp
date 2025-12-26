@@ -1,9 +1,20 @@
 #pragma once
 #include "DynamicBuffer.hpp"
-#include <string.h>
 #include <type_traits>
 
 namespace kstd {
+	size_t strlen(const char* s) {
+		if (!s) return 0;
+		size_t n = 0;
+		while (s[n] != '\0') ++n;
+		return n;
+	}
+	size_t wcslen(const wchar_t* s) {
+		if (!s) return 0;
+		size_t n = 0;
+		while (s[n] != L'\0') ++n;
+		return n;
+	}
 
 	template<typename T>
 	class String : public DynamicBuffer<T>

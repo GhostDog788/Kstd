@@ -1,5 +1,5 @@
 #pragma once
-#include <kstd/memory/allocation.hpp>
+#include <kstd/memory/Allocation.hpp>
 
 namespace kstd {
 	template<typename T>

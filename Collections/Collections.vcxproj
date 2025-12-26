@@ -127,9 +127,10 @@
     <ClInclude Include="kstd\collections\DynamicBuffer.hpp" />
     <ClInclude Include="kstd\collections\String.hpp" />
     <ClInclude Include="kstd\kstd.h" />
-    <ClInclude Include="kstd\memory\allocation.hpp" />
-    <ClInclude Include="kstd\memory\move.hpp" />
+    <ClInclude Include="kstd\memory\Allocation.hpp" />
+    <ClInclude Include="kstd\memory\Move.hpp" />
     <ClInclude Include="kstd\collections\StaticBuffer.hpp" />
+    <ClInclude Include="kstd\memory\New.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

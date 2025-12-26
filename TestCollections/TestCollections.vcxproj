@@ -126,8 +126,10 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="TestCollections.cpp" />
+    <ClCompile Include="Tests.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Tests.h" />
     <ClInclude Include="Utils.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

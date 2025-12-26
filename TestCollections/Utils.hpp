@@ -1,8 +1,8 @@
 #include <string>
 #include <kstd/collections/CircularBuffer.hpp>
 
-template<typename T>
-std::string serialize_circular_buffer(kstd::CircularBuffer<T>& buffer)
+template<typename T, unsigned int SIZE>
+std::string serialize_circular_buffer(kstd::CircularBuffer<T, SIZE>& buffer)
 {
 	std::string result;
 	result += '[';

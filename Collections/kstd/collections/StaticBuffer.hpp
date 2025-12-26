@@ -1,50 +1,38 @@
 #pragma once
-#include <kstd/memory/allocation.hpp>
 
 namespace kstd {
 
-	template<typename T>
+	template<typename T, unsigned int SIZE>
 	class StaticBuffer
 	{
 	public:
-		StaticBuffer(size_t items) : m_items(items) { m_buffer = allocate_array<T>(items); }
-		StaticBuffer(const StaticBuffer&) = delete;
-		StaticBuffer& operator=(const StaticBuffer&) = delete;
-		StaticBuffer(StaticBuffer&& other) noexcept
-		{
+		StaticBuffer() : m_buffer{} {};
+		StaticBuffer(const StaticBuffer& other) {
 			_copy_from(other);
-			other._moved();
 		}
-		StaticBuffer& operator=(StaticBuffer&& other) noexcept
-		{
-			if (this != &other)
-			{
+		StaticBuffer& operator=(const StaticBuffer& other) {
+			if (this != &other) {
 				_copy_from(other);
-				other._moved();
 			}
 			return *this;
 		}
-		virtual ~StaticBuffer() { free_array<T>(m_buffer); }
+		StaticBuffer(StaticBuffer&& other) = delete;
+		StaticBuffer& operator=(StaticBuffer&& other) = delete;
+		virtual ~StaticBuffer() = default;
 
-		virtual T& operator[](size_t index) const { return m_buffer[index]; }
+		virtual T& operator[](size_t index) { return m_buffer[index]; }
 
-		virtual size_t size() const { return m_items; }
-		virtual size_t size_in_bytes() const { return m_items * sizeof(T); }
+		virtual size_t size() const { return SIZE; }
+		virtual size_t size_in_bytes() const { return SIZE * sizeof(T); }
 
 	protected:
-		T* m_buffer = nullptr;
-		size_t m_items = 0;
-
-		virtual void _moved()
-		{
-			m_buffer = nullptr;
-			m_items = 0;
-		}
+		T m_buffer[SIZE];
 
 		virtual void _copy_from(const StaticBuffer& other)
 		{
-			m_buffer = other.m_buffer;
-			m_items = other.m_items;
+			for (size_t i = 0; i < SIZE; ++i) {
+				m_buffer[i] = other.m_buffer[i];
+			}
 		}
 	};
 }
