@@ -108,6 +108,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -122,6 +123,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -138,7 +140,8 @@
     <ClInclude Include="kstd\memory\Move.hpp" />
     <ClInclude Include="kstd\collections\StaticBuffer.hpp" />
     <ClInclude Include="kstd\memory\New.hpp" />
-    <ClInclude Include="kstd\synchronization\BaseGuard.hpp" />
+    <ClInclude Include="kstd\memory\UniquePointer.hpp" />
+    <ClInclude Include="kstd\synchronization\Lock.hpp" />
     <ClInclude Include="kstd\synchronization\RemoveLock.hpp" />
     <ClInclude Include="kstd\synchronization\SpinLock.hpp" />
   </ItemGroup>

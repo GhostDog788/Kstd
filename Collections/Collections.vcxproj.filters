@@ -48,7 +48,10 @@
     <ClInclude Include="kstd\synchronization\SpinLock.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="kstd\synchronization\BaseGuard.hpp">
+    <ClInclude Include="kstd\memory\UniquePointer.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="kstd\synchronization\Lock.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
