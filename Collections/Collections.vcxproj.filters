@@ -42,5 +42,14 @@
     <ClInclude Include="kstd\synchronization\RemoveLock.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="kstd\collections\ShiftingBuffer.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="kstd\synchronization\SpinLock.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="kstd\synchronization\BaseGuard.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

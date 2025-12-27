@@ -52,8 +52,7 @@ namespace kstd {
 	class RemoveLock
 	{
 	public:
-		RemoveLock() = default;
-		void Initialize() {
+		RemoveLock() {
 			IoInitializeRemoveLock(&m_remove_lock, 'RmLk', 0, 0);
 		}
 		RemoveLockGuard&& LockAcquire(PIRP Irp, NTSTATUS& status) {

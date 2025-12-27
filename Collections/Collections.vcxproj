@@ -138,7 +138,9 @@
     <ClInclude Include="kstd\memory\Move.hpp" />
     <ClInclude Include="kstd\collections\StaticBuffer.hpp" />
     <ClInclude Include="kstd\memory\New.hpp" />
+    <ClInclude Include="kstd\synchronization\BaseGuard.hpp" />
     <ClInclude Include="kstd\synchronization\RemoveLock.hpp" />
+    <ClInclude Include="kstd\synchronization\SpinLock.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
