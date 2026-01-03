@@ -14,7 +14,7 @@ namespace kstd {
 	class LockGuard
 	{
 	public:
-		LockGuard(Lock* lock) : m_lock(lock) {
+		explicit LockGuard(Lock* lock = nullptr) : m_lock(lock) {
 			if (m_lock) m_lock->lock();
 		};
 		LockGuard(const LockGuard& other) = delete;

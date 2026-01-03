@@ -27,9 +27,6 @@
     <ClInclude Include="kstd\collections\StaticBuffer.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="kstd\memory\Allocation.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="kstd\collections\DynamicBuffer.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -52,6 +49,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="kstd\synchronization\Lock.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="kstd\memory\Allocation.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

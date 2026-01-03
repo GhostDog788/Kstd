@@ -15,9 +15,11 @@ namespace kstd {
 		}
 		virtual ~CircularBuffer() = default;
 
-		virtual bool push(const T& item) {
+		virtual bool push(const T& item, bool lock = true) {
 			// returns if the write succeeded
-			kstd::LockGuard guard(m_write_lock.get());
+			kstd::LockGuard guard;
+			if (lock) guard = kstd::LockGuard(m_write_lock.get());
+
 			if ((m_write + 1) % SIZE == m_read) {
 				if (!m_override_oldest) {
 					if (!m_first_to_touch) return false;
@@ -33,20 +35,31 @@ namespace kstd {
 			return true;
 		}
 
-		virtual bool head(T& head) const {
+		virtual bool head(T& head, bool lock = true) {
 			// returns if the read succeeded
-			kstd::LockGuard guard(m_read_lock.get());
+			kstd::LockGuard guard;
+			if (lock) guard = kstd::LockGuard(m_read_lock.get());
+
 			if (m_read == m_write) return false;
 			head = this->m_buffer[m_read];
 			return true;
 		}
-		virtual bool pop(T& head) {
+		virtual bool pop(T& head, bool lock = true) {
 			// returns if the read succeeded
-			kstd::LockGuard guard(m_read_lock.get());
+			kstd::LockGuard guard;
+			if (lock) guard = kstd::LockGuard(m_read_lock.get());
+
 			if (m_read == m_write) return false;
 			head = this->m_buffer[m_read];
 			m_read = (m_read + 1) % SIZE;
 			return true;
+		}
+
+		kstd::LockGuard&& getReadLockGuard() {
+			return kstd::move(kstd::LockGuard(m_read_lock.get()));
+		}
+		kstd::LockGuard&& getWriteLockGuard() {
+			return kstd::move(kstd::LockGuard(m_write_lock.get()));
 		}
 
 	private:

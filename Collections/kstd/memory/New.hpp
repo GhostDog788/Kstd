@@ -2,205 +2,139 @@
 
 #ifdef _KERNEL_MODE
 #include <ntddk.h>
-#else
-#include <cstdlib>  // malloc/free
-#include <stddef.h>
-#include <new> // std::nothrow_t
-#endif
 
-namespace kstd {
-
-    // ---------- Cross-mode configuration ----------
-#ifdef _KERNEL_MODE
-    constexpr POOL_TYPE kDefaultPool = NonPagedPoolNx;
-    constexpr unsigned long kDefaultTag = 'dtsK';
-#else
-    constexpr unsigned long kDefaultTag = 0; // unused in user mode
-#endif
-
-    // Tag type: new (kstd::pool_tag<'TAG1'>) T(...)
-    template<unsigned long TagV>
-    struct pool_tag_t { static constexpr unsigned long value = TagV; };
-
-    template<unsigned long TagV>
-    inline constexpr pool_tag_t<TagV> pool_tag{};
-
-#ifdef _KERNEL_MODE
-    // Pool type wrapper: new (kstd::pool_type{PagedPool}) T(...)
-    struct pool_type_t { POOL_TYPE type; };
-    constexpr pool_type_t paged_pool{ PagedPool };
-    constexpr pool_type_t nonpaged_pool{ NonPagedPoolNx };
-#else
-    // User mode: keep same API, but pool type is ignored
-    struct pool_type_t { int ignored; };
-    constexpr pool_type_t paged_pool{ 0 };
-    constexpr pool_type_t nonpaged_pool{ 0 };
-#endif
-
-    // ---------- Allocation backend ----------
-    inline void* alloc_bytes(size_t sz,
-#ifdef _KERNEL_MODE
-        POOL_TYPE pool,
-        unsigned long tag
-#else
-        int /*pool*/,
-        unsigned long /*tag*/
-#endif
-    ) noexcept
-    {
-        if (sz == 0) sz = 1;
-
-#ifdef _KERNEL_MODE
-        return ExAllocatePool2(pool, sz, tag);
-#else
-        return std::malloc(sz);
-#endif
-    }
-
-    inline void free_bytes(void* p) noexcept
-    {
-        if (!p) return;
-#ifdef _KERNEL_MODE
-        ExFreePool(p);
-#else
-        std::free(p);
-#endif
-    }
-
-} // namespace kstd
-
-// ============================================================
-// Global operator new/delete (single object)
-// ============================================================
-
-inline void* __cdecl operator new(size_t, void* p) noexcept { return p; }
-
-void* __cdecl operator new(size_t sz)
+namespace kstd
 {
-#ifdef _KERNEL_MODE
-    return kstd::alloc_bytes(sz, kstd::kDefaultPool, kstd::kDefaultTag);
-#else
-    return kstd::alloc_bytes(sz, 0, 0);
+    struct nothrow_t { explicit constexpr nothrow_t() = default; };
+    inline constexpr nothrow_t nothrow{};
+
+#if defined(__cpp_aligned_new) && (__cpp_aligned_new >= 201606L)
+    enum class align_val_t : SIZE_T {};
 #endif
 }
 
-inline void __cdecl operator delete(void*, void*) noexcept {}
+#ifndef KSTD_NEW_TAG
+#define KSTD_NEW_TAG 'Kstd'
+#endif
+
+#ifndef KSTD_NEW_FLAGS
+#define KSTD_NEW_FLAGS (POOL_FLAG_NON_PAGED | POOL_FLAG_UNINITIALIZED)
+#endif
+
+#ifndef KSTD_NEW_NO_RAISE
+#define KSTD_NEW_NO_RAISE 0
+#endif
+
+inline void* operator new(SIZE_T, void* p) noexcept { return p; }
+inline void  operator delete(void*, void*) noexcept {}
+
+namespace kstd::detail
+{
+    __forceinline void* alloc_raw(SIZE_T size) noexcept
+    {
+        if (size == 0) size = 1;
+        return ExAllocatePool2((POOL_FLAGS)KSTD_NEW_FLAGS, size, (ULONG)KSTD_NEW_TAG);
+    }
+
+    __forceinline void free_raw(void* p) noexcept
+    {
+        if (p) ExFreePool(p);
+    }
+
+    __forceinline void* alloc_or_raise(SIZE_T size)
+    {
+        void* p = alloc_raw(size);
+        if (!p)
+        {
+#if KSTD_NEW_NO_RAISE
+            return nullptr;
+#else
+            ExRaiseStatus(STATUS_INSUFFICIENT_RESOURCES);
+#endif
+        }
+        return p;
+    }
+}
+
+void* __cdecl operator new(SIZE_T size)
+{
+    return kstd::detail::alloc_or_raise(size);
+}
+
+void* __cdecl operator new[](SIZE_T size)
+{
+    return kstd::detail::alloc_or_raise(size);
+}
+
+void* __cdecl operator new(SIZE_T size, const kstd::nothrow_t&) noexcept
+{
+    return kstd::detail::alloc_raw(size);
+}
+
+void* __cdecl operator new[](SIZE_T size, const kstd::nothrow_t&) noexcept
+{
+    return kstd::detail::alloc_raw(size);
+}
 
 void __cdecl operator delete(void* p) noexcept
 {
-    kstd::free_bytes(p);
+    kstd::detail::free_raw(p);
 }
-
-// sized delete (MSVC may emit)
-void __cdecl operator delete(void* p, size_t) noexcept
-{
-    kstd::free_bytes(p);
-}
-
-#ifndef _KERNEL_MODE
-void* __cdecl operator new(size_t sz, const std::nothrow_t&) noexcept
-{
-    return ::operator new(sz);
-}
-
-void __cdecl operator delete(void* p, const std::nothrow_t&) noexcept
-{
-    ::operator delete(p);
-}
-#endif
-
-// ============================================================
-// Global operator new/delete (arrays)
-// ============================================================
-
-inline void* __cdecl operator new[](size_t, void* p) noexcept { return p; }
-
-void* __cdecl operator new[](size_t sz)
-{
-#ifdef _KERNEL_MODE
-    return kstd::alloc_bytes(sz, kstd::kDefaultPool, kstd::kDefaultTag);
-#else
-    return kstd::alloc_bytes(sz, 0, 0);
-#endif
-}
-
-inline void __cdecl operator delete[](void*, void*) noexcept {}
 
 void __cdecl operator delete[](void* p) noexcept
 {
-    kstd::free_bytes(p);
+    kstd::detail::free_raw(p);
 }
 
-void __cdecl operator delete[](void* p, size_t) noexcept
+void __cdecl operator delete(void* p, SIZE_T) noexcept
 {
-    kstd::free_bytes(p);
+    kstd::detail::free_raw(p);
 }
 
-#ifndef _KERNEL_MODE
-void* __cdecl operator new[](size_t sz, const std::nothrow_t&) noexcept
+void __cdecl operator delete[](void* p, SIZE_T) noexcept
 {
-    return ::operator new[](sz);
+    kstd::detail::free_raw(p);
 }
 
-void __cdecl operator delete[](void* p, const std::nothrow_t&) noexcept
+#if defined(__cpp_aligned_new) && (__cpp_aligned_new >= 201606L)
+inline void* __cdecl operator new(SIZE_T size, kstd::align_val_t)
 {
-    ::operator delete[](p);
+    return kstd::detail::alloc_or_raise(size);
+}
+
+inline void* __cdecl operator new[](SIZE_T size, kstd::align_val_t)
+{
+    return kstd::detail::alloc_or_raise(size);
+}
+
+inline void* __cdecl operator new(SIZE_T size, kstd::align_val_t, const kstd::nothrow_t&) noexcept
+{
+    return kstd::detail::alloc_raw(size);
+}
+
+inline void* __cdecl operator new[](SIZE_T size, kstd::align_val_t, const kstd::nothrow_t&) noexcept
+{
+    return kstd::detail::alloc_raw(size);
+}
+
+inline void __cdecl operator delete(void* p, kstd::align_val_t) noexcept
+{
+    kstd::detail::free_raw(p);
+}
+
+inline void __cdecl operator delete[](void* p, kstd::align_val_t) noexcept
+{
+    kstd::detail::free_raw(p);
+}
+
+inline void __cdecl operator delete(void* p, SIZE_T, kstd::align_val_t) noexcept
+{
+    kstd::detail::free_raw(p);
+}
+
+inline void __cdecl operator delete[](void* p, SIZE_T, kstd::align_val_t) noexcept
+{
+    kstd::detail::free_raw(p);
 }
 #endif
-
-// ============================================================
-// Tagged / pool-selecting placement new (cross-mode)
-// ============================================================
-
-// new (pool_tag<'TAG1'>) T
-template<unsigned long TagV>
-void* __cdecl operator new(size_t sz, kstd::pool_tag_t<TagV>) noexcept
-{
-#ifdef _KERNEL_MODE
-    return kstd::alloc_bytes(sz, kstd::kDefaultPool, TagV);
-#else
-    // user mode ignores tag, but API stays the same
-    return kstd::alloc_bytes(sz, 0, 0);
 #endif
-}
-
-// new (pool_type_t{...}) T
-inline void* __cdecl operator new(size_t sz, kstd::pool_type_t pt) noexcept
-{
-#ifdef _KERNEL_MODE
-    return kstd::alloc_bytes(sz, pt.type, kstd::kDefaultTag);
-#else
-    (void)pt;
-    return kstd::alloc_bytes(sz, 0, 0);
-#endif
-}
-
-// new (pool_type_t{...}, pool_tag<'TAG1'>) T
-template<unsigned long TagV>
-inline void* __cdecl operator new(size_t sz, kstd::pool_type_t pt, kstd::pool_tag_t<TagV>) noexcept
-{
-#ifdef _KERNEL_MODE
-    return kstd::alloc_bytes(sz, pt.type, TagV);
-#else
-    (void)pt;
-    return kstd::alloc_bytes(sz, 0, 0);
-#endif
-}
-
-// Matching placement deletes (only used if ctor throws; still define them)
-template<unsigned long TagV>
-inline void __cdecl operator delete(void* p, kstd::pool_tag_t<TagV>) noexcept
-{
-    kstd::free_bytes(p);
-}
-
-inline void __cdecl operator delete(void* p, kstd::pool_type_t) noexcept
-{
-    kstd::free_bytes(p);
-}
-
-template<unsigned long TagV>
-inline void __cdecl operator delete(void* p, kstd::pool_type_t, kstd::pool_tag_t<TagV>) noexcept
-{
-    kstd::free_bytes(p);
-}
