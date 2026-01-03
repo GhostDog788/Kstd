@@ -1,5 +1,5 @@
 #pragma once
-#include <kstd/memory/Allocation.hpp>
+#include <kstd/memory/New.hpp>
 
 namespace kstd {
 	template<typename T>
@@ -7,7 +7,7 @@ namespace kstd {
 	{
 	public:
 		DynamicBuffer(size_t capacity = DEFAULT_NUM_OF_ITEMS, size_t expansion_size = DEFAULT_EXPANSION_SIZE) 
-			: m_capacity(capacity), m_expansion_size(expansion_size), m_items(0) { m_buffer = allocate_array<T>(capacity); }
+			: m_capacity(capacity), m_expansion_size(expansion_size), m_items(0) { m_buffer = new T[capacity]; }
 		DynamicBuffer(const DynamicBuffer&) = delete;
 		DynamicBuffer& operator=(const DynamicBuffer&) = delete;
 		DynamicBuffer(DynamicBuffer&& other) noexcept
@@ -24,7 +24,7 @@ namespace kstd {
 			}
 			return *this;
 		}
-		virtual ~DynamicBuffer() { free_array<T>(m_buffer); }
+		virtual ~DynamicBuffer() { delete[] m_buffer; }
 
 		DynamicBuffer& operator+=(const DynamicBuffer& other) {
 			if (m_items + other.m_items > m_capacity)
@@ -70,12 +70,12 @@ namespace kstd {
 		virtual void resize(size_t new_capacity)
 		{
 			m_capacity = new_capacity;
-			T* new_buffer = allocate_array<T>(m_capacity);
+			T* new_buffer = new T[m_capacity];
 			for (size_t i = 0; i < m_items; ++i)
 			{
 				new_buffer[i] = m_buffer[i];
 			}
-			free_array<T>(m_buffer);
+			delete[] m_buffer;
 			m_buffer = new_buffer;
 		}
 	protected:

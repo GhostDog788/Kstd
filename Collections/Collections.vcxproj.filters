@@ -51,7 +51,7 @@
     <ClInclude Include="kstd\synchronization\Lock.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="kstd\memory\Allocation.hpp">
+    <ClInclude Include="kstd\synchronization\UmMutexLock.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

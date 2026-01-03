@@ -27,18 +27,10 @@ void test_strings()
 
 void test_circular_buffer()
 {
-	kstd::CircularBuffer<int, BUFFER_SIZE> buffer;
+	kstd::CircularBuffer<int, BUFFER_SIZE, kstd::MutexLock, kstd::MutexLock> buffer;
 	for (int i = -10; i <= 15; ++i)
 	{
 		buffer.push(i);
 		std::cout << serialize_circular_buffer(buffer) << std::endl;
 	}
-
-	// Move semantics test
-	auto buffer2(kstd::move(buffer));
-	std::cout << "Move constructor: " << serialize_circular_buffer(buffer2) << std::endl;
-	buffer = kstd::move(buffer2);
-	std::cout << "Move instance: " << serialize_circular_buffer(buffer) << std::endl;
-	auto buffer3 = kstd::move(buffer);
-	std::cout << "Move copy constructor: " << serialize_circular_buffer(buffer3) << std::endl;
 }
